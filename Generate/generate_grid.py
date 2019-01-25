@@ -17,7 +17,7 @@ grid = {
 }
 
 # These settings let it run on the batch
-templatescript = "batch_scripts/batchScript_template_CEDAR.sh"
+templatescript = "../batch_templates/batchScript_template_CEDAR.sh"
 location_batchscripts = "batch_scripts/"
 location_batchlogs = "batch_logs/"
 
@@ -92,7 +92,7 @@ for point in points :
   if not os.path.exists(dest) :
     os.symlink(src,dest)
 
-  generate_command = "Generate_tf.py --ecmEnergy=13000 --firstEvent=1 --runNumber=375120 --jobConfig={0} --maxEvents=1000 --outputEVNTFile=test_evgen.EVNT.root --randomSeed=4".format(JO_name)
+  generate_command = "Generate_tf.py --ecmEnergy=13000 --firstEvent=1 --runNumber=375120 --jobConfig={0} --maxEvents=10000 --outputEVNTFile=test_evgen.EVNT.root --randomSeed=4".format(JO_name)
   run_command = """echo 'starting job.';\ncd {0};\nasetup --restore;\ncd {1};\n{2}\n""".format(os.getcwd(),dir_name,generate_command)
 
   # Make batch script

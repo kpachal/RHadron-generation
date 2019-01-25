@@ -11,6 +11,7 @@
 #SBATCH --time=TIMEVAL
 #SBATCH --account=def-vetm
 #SBATCH --job-name=singularity_test
+#SBATCH --mem 500
 ##SBATCH -p main
 ##SBATCH --ntasks=1
 
