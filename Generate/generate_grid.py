@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
 import os
+import subprocess
+
+# Do everything but submit if true
+isTest = True
 
 # Want detailed scan of each thing, rather than all combinations.
 # Take central value as "crossing point" and scan the other axis.
@@ -11,6 +15,16 @@ grid = {
   "lifetime" : ["0p1ns","0p5ns","1ns","10ns"],
   "gluinoball_frac" : [5,10,20],
 }
+
+# These settings let it run on the batch
+templatescript = "batch_scripts/batchScript_template_CEDAR.sh"
+location_batchscripts = "batch_scripts/"
+location_batchlogs = "batch_logs/"
+
+# Make sure they exist
+for thisdir in [location_batchscripts,location_batchlogs] :
+  if not os.path.exists(thisdir) :
+    os.mkdir(thisdir)
 
 # Generate combinations
 points = []
@@ -33,6 +47,30 @@ for scan_axis in ordered_axes :
     # but I think that's OK.
 
     points.append(point_dict)
+
+# This will be used for batch submission
+def makeBatchScript(batchcommand,stringForNaming) :
+
+  # open modified batch script (fbatchout) for writing
+  batchtempname = '{0}/run_{1}.sh'.format(location_batchscripts,stringForNaming)
+  fbatchout = open(batchtempname, 'w')
+
+  with open(templatescript, 'r') as fin:
+    for line in fin :
+      print "startline"
+      print line
+      print "endline"
+      if "ALRB_CONT_RUNPAYLOAD" in line :
+        line = 'export ALRB_CONT_RUNPAYLOAD="""{0}"""'.format(batchcommand)
+      if "TIMEVAL" in line :
+        line = line.replace("TIMEVAL","4:00:00")
+      fbatchout.write(line)
+
+  modcommand = 'chmod 744 {0}'.format(batchtempname)
+  subprocess.call(modcommand, shell=True)
+  fbatchout.close()
+
+  return batchtempname
 
 # Loop over each point to make JOs and launch job
 for point in points :
@@ -57,6 +95,15 @@ for point in points :
   if not os.path.exists(dest) :
     os.symlink(src,dest)
 
+  generate_command = "Generate_tf.py --ecmEnergy=13000 --firstEvent=1 --runNumber=375120 --jobConfig={0} --maxEvents=1000 --outputEVNTFile=test_evgen.EVNT.root --randomSeed=4".format(JO_name)
+  run_command = """echo 'starting job.';\ncd {0};\nasetup --restore;\ncd {1};\n{2}\n""".format(os.getcwd(),dir_name,generate_command)
+
   # Make batch script
+  script = makeBatchScript(run_command,name_string)
 
   # Run generation
+  submitcommand = "sbatch {0}".format(script)
+  print submitcommand
+
+  if not isTest :
+    subprocess.call(submitcommand, shell=True)  
