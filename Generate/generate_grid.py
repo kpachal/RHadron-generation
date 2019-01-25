@@ -60,7 +60,7 @@ def makeBatchScript(batchcommand,stringForNaming) :
       if "ALRB_CONT_RUNPAYLOAD" in line :
         line = 'export ALRB_CONT_RUNPAYLOAD="""{0}"""'.format(batchcommand)
       if "TIMEVAL" in line :
-        line = line.replace("TIMEVAL","4:00:00")
+        line = line.replace("TIMEVAL","2:00:00")
       fbatchout.write(line)
 
   modcommand = 'chmod 744 {0}'.format(batchtempname)
