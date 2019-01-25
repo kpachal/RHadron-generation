@@ -11,7 +11,7 @@ isTest = False
 grid = {
   "mass_gluino" : [1000,1500,2000,2500,3000],
   "mass_neutralino" : [100,300,500,700,900],
-  "mass_spectrum" : ["mass0","mass3","mass5","mass8"],
+  "mass_spectrum" : ["sp0","sp3","sp5","sp8"],
   "lifetime" : ["0p1ns","0p5ns","1ns","10ns"],
   "gluinoball_frac" : [5,10,20],
 }
@@ -69,16 +69,28 @@ def makeBatchScript(batchcommand,stringForNaming) :
 
   return batchtempname
 
+# Remove duplicates from points
+used_combos = []
+for point in points :
+  name_string = "{0}_{1}_{2}_{3}_gl{4}".format(point["mass_gluino"],point["mass_neutralino"],point["lifetime"],point["mass_spectrum"],point["gluinoball_frac"])
+  if name_string in used_combos :
+    del points[points.index(point)]
+  else :
+    used_combos.append(name_string)
+
 # Loop over each point to make JOs and launch job
 for point in points :
   
   name_string = "{0}_{1}_{2}_{3}_gl{4}".format(point["mass_gluino"],point["mass_neutralino"],point["lifetime"],point["mass_spectrum"],point["gluinoball_frac"])
   dir_name = "Generate_"+name_string
-  JO_name = "MC15.375120.MGPy8EG_A14NNPDF23LO_GG_direct_RHad_"+name_string+".py"
+  JO_name = "MC15.375120.MGPy8EG_A14NNPDF23LO_GG_direct_RH_"+name_string+".py"
 
   # Make output directory
   if not os.path.exists(dir_name) :
     os.mkdir(dir_name)
+  else :
+    print "Duplicate present here!"
+    print dir_name
 
   # Make job options file
   filename = dir_name+"/"+JO_name
@@ -106,4 +118,4 @@ for point in points :
     subprocess.call(submitcommand, shell=True) 
 
   # Uncomment to do just one point
-  break 
+  #break 
