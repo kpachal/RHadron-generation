@@ -56,7 +56,7 @@ for evnt_file in evnt_files :
   if not os.path.exists(out_dir) :
     os.mkdir(out_dir)
 
-  out_file = "{0}.pool.root"
+  out_file = "{0}.pool.root".format(name_string)
 
   reco_command = "Reco_tf.py --inputEVNTFile {0} --outputDAODFile {1} --reductionConf TRUTH1".format(evnt_file,out_file)
   run_command = """echo 'starting job.';\ncd {0};\nasetup --restore;\ncd {1};\n{2}\n""".format(os.getcwd(),out_dir,reco_command)
