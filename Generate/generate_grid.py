@@ -4,7 +4,7 @@ import os
 import subprocess
 
 # Do everything but submit if true
-isTest = True
+isTest = False
 
 # Want detailed scan of each thing, rather than all combinations.
 # Take central value as "crossing point" and scan the other axis.
@@ -57,9 +57,6 @@ def makeBatchScript(batchcommand,stringForNaming) :
 
   with open(templatescript, 'r') as fin:
     for line in fin :
-      print "startline"
-      print line
-      print "endline"
       if "ALRB_CONT_RUNPAYLOAD" in line :
         line = 'export ALRB_CONT_RUNPAYLOAD="""{0}"""'.format(batchcommand)
       if "TIMEVAL" in line :
@@ -106,4 +103,7 @@ for point in points :
   print submitcommand
 
   if not isTest :
-    subprocess.call(submitcommand, shell=True)  
+    subprocess.call(submitcommand, shell=True) 
+
+  # Uncomment to do just one point
+  break 
