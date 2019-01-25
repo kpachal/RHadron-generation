@@ -6,7 +6,7 @@ import subprocess
 isTest = False
 
 # Use if you want only a subset of the files
-tag = "byhand"
+tag = ""
 
 # Getting EVNT files
 source_dir = os.path.abspath(os.path.join(os.getcwd()+"/../Generate/"))
@@ -72,5 +72,5 @@ for evnt_file in evnt_files :
     subprocess.call(submitcommand, shell=True) 
 
   # Uncomment to do just one point
-  break 
+  #break 
 

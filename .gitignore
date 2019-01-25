@@ -1,2 +1,8 @@
+# Constantly regenerated outputs
+EVNTtoTruth/EVNTtoTruth_*
+Generate/Generate_*
+EVNTtoTruth/batch_scripts
+
+# Log files and athena setups
 slurm*.out
 .*.save
