@@ -8,7 +8,9 @@ import os,sys
 import glob
 
 # User settings
-inputfile_form = "/home/kpachal/RHadronGeneration/EVNTtoTruth/EVNTtoTruth_*/DAOD_TRUTH1.*.root"
+# No point scanning items which I can't measure changing:
+# those are really just for Atsushi
+inputfile_form = "/home/kpachal/RHadronGeneration/EVNTtoTruth/EVNTtoTruth_*500_1ns*/DAOD_TRUTH1.*.root"
 
 verbose = False
 
@@ -18,7 +20,7 @@ ROOT.gROOT.Macro( '$ROOTCOREDIR/scripts/load_packages.C' )
 
 ## This dict defines the mapping from index to PDGID for my R-hadrons
 RHad_map = {
-  1000993 : 1,
+  1000993 : 1, # Gluinoballs
   1009113 : 2,
   1009213 : 3,
   1009223 : 4,
@@ -128,7 +130,9 @@ for inputfile in file_list :
 
   outputFile = TFile("outputFiles/"+inputfile.replace(".root","_output.root").split("/")[-1],"RECREATE")
   h_mgluino = TH1D("h_mgluino","h_mgluino", 250 , 1000. ,3500.)
-  h_mRHads = TH2D("h_mRHads","h_mRHads", 38, 1., 39, 2500 , 1000. ,3500.)
+  h_mRHads = TH2D("h_mRHads","h_mRHads", 38, 1., 39, 2500*4 , 1000. ,3500.)
+  h_nRHads = TH1D("h_nRHads","h_nRHads",5,0,5)
+  h_statusRHads = TH1D("h_statusRHads","h_statusRHads",5,0,5)
 
   for entry in xrange( t.GetEntries() ):
     t.GetEntry( entry )
@@ -147,13 +151,17 @@ for inputfile in file_list :
       h_mgluino.Fill(gluino.m()/1000.0)
 
     if verbose : print "R-hadrons:"
+    h_nRHads.Fill(len(RHads))
     for rHad in RHads :
       if verbose : print rHad.pdgId(),rHad.m(),getPt(rHad)
       h_mRHads.Fill(RHad_map[rHad.absPdgId()],rHad.m()/1000.0)
+      h_statusRHads.Fill(rHad.status())
 
   outputFile.cd()
   h_mgluino.Write()
   h_mRHads.Write()
+  h_nRHads.Write()
+  h_statusRHads.Write()
 
   outputFile.Close()
   print "Created file",outputFile
