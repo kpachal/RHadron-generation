@@ -23,7 +23,7 @@ generate g g > go go $ susysq susysq~ @1
 # add process p p > go go j j $ susysq susysq~ @3
 # '''
 njets = 2
-evt_multiplier = 4
+evt_multiplier = 6
 evgenLog.info('Registered generation of gluino grid '+str(runArgs.runNumber))
 
 evgenConfig.contact  = [ "lawrence.lee.jr@cern.ch" ]
