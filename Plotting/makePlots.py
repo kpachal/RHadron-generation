@@ -59,8 +59,18 @@ for file in files :
   openfile.Close()
   validation_hists[spectrum_nominal] = {"nRHads" : hist_nRHads, "statusRHads" : hist_statusRHads}  
 
+  # Find peak of gluinoball bin.
+  maxVal = -1
+  maxBin = -1
+  for ybin in range(hist.GetNbinsY()) :
+    if hist.GetBinContent(1,ybin) > maxVal :
+      maxVal = hist.GetBinContent(1,ybin)
+      maxBin = ybin
+  print "Maximum was found in bin with center",hist.GetYaxis().GetBinCenter(maxBin)
+  print "and low edge, high edge",hist.GetYaxis().GetBinLowEdge(maxBin),hist.GetYaxis().GetBinLowEdge(maxBin+1)
+
   # Draw this hist alone
-  myPainter.draw2DHist(hist,"plots/test_"+spectrum_nominal,"R-Hadron ID [A.U.]",0,40,"R-Hadron mass [GeV]",1995,2025,"Events",luminosity=-1,CME=-1,doRectangular=False)
+  myPainter.draw2DHist(hist,"plots/test_"+spectrum_nominal,"R-Hadron ID [A.U.]",0,40,"R-Hadron mass [GeV]",1999,2010,"Events",luminosity=-1,CME=-1,doRectangular=False)
 
 spectrum_list = sorted(validation_hists.keys())
 hist_list_nRHads = [validation_hists[i]["nRHads"] for i in spectrum_list]
