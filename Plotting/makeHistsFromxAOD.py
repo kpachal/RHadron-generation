@@ -132,8 +132,8 @@ for inputfile in file_list :
   outputFile = TFile("outputFiles/"+inputfile.replace(".root","_output.root").split("/")[-1],"RECREATE")
   h_mgluino = TH1D("h_mgluino","h_mgluino", 250 , 1000. ,3500.)
   h_mRHads = TH2D("h_mRHads","h_mRHads", 38, 1., 39, 2500*4 , 1000. ,3500.)
-  h_nRHads = TH1D("h_nRHads","h_nRHads",5,0,5)
-  h_statusRHads = TH1D("h_statusRHads","h_statusRHads",5,0,5)
+  h_nRHads = TH1D("h_nRHads","h_nRHads",5,-0.5,4.5)
+  h_statusRHads = TH1D("h_statusRHads","h_statusRHads",5,-0.5,4.5)
 
   for entry in xrange( t.GetEntries() ):
     t.GetEntry( entry )
