@@ -10,7 +10,7 @@ import glob
 # User settings
 # No point scanning items which I can't measure changing:
 # those are really just for Atsushi
-inputfile_form = "/home/kpachal/RHadronGeneration/EVNTtoTruth/EVNTtoTruth_*500_1ns*/DAOD_TRUTH1.*.root"
+inputfile_form = "/afs/cern.ch/work/k/kpachal/RHadronGeneration/EVNTtoTruth/EVNTtoTruth_*500_1ns*/DAOD_TRUTH1.*.root"
 
 verbose = False
 
@@ -124,6 +124,7 @@ def findGluinosAndRHads(truthparticles) :
   return gluinos,RHads    
 
 file_list = glob.glob(inputfile_form)
+print "Got file list",file_list
 for inputfile in file_list :
 
   t = readXAODFile(inputfile)
@@ -131,8 +132,8 @@ for inputfile in file_list :
   outputFile = TFile("outputFiles/"+inputfile.replace(".root","_output.root").split("/")[-1],"RECREATE")
   h_mgluino = TH1D("h_mgluino","h_mgluino", 250 , 1000. ,3500.)
   h_mRHads = TH2D("h_mRHads","h_mRHads", 38, 1., 39, 2500*4 , 1000. ,3500.)
-  h_nRHads = TH1D("h_nRHads","h_nRHads",5,0,5)
-  h_statusRHads = TH1D("h_statusRHads","h_statusRHads",5,0,5)
+  h_nRHads = TH1D("h_nRHads","h_nRHads",5,-0.5,4.5)
+  h_statusRHads = TH1D("h_statusRHads","h_statusRHads",5,-0.5,4.5)
 
   for entry in xrange( t.GetEntries() ):
     t.GetEntry( entry )

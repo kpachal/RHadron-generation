@@ -1,9 +1,16 @@
 import os
 import glob
 import subprocess
+from pbs_handler import PBSHandler
+from condor_handler import CondorHandler
 
 # Do everything but submit if true
 isTest = False
+
+# Batch controls
+useBatch = True
+# Currently supported: condor, pbs
+batch_type = "condor"
 
 # Use if you want only a subset of the files
 tag = ""
@@ -13,36 +20,18 @@ source_dir = os.path.abspath(os.path.join(os.getcwd()+"/../Generate/"))
 print source_dir
 evnt_files = glob.glob(source_dir+"/Generate_*{0}*/*.EVNT.root".format(tag))
 
-# These settings let it run on the batch
-templatescript = "../batch_templates/batchScript_template_CEDAR.sh"
-location_batchscripts = "batch_scripts/"
-location_batchlogs = "batch_logs/"
+# Create batch handler
+location_batchscripts = os.getcwd()+"/batch_scripts/"
+location_batchlogs = os.getcwd()+"/batch_logs/"
+if batch_type == "condor" :
+  batchmanager = CondorHandler(location_batchlogs, location_batchscripts)
+elif batch_type == "pbs" :
+  batchmanager = PBSHandler(location_batchlogs, location_batchscripts) 
 
 # Make sure they exist
 for thisdir in [location_batchscripts,location_batchlogs] :
   if not os.path.exists(thisdir) :
     os.mkdir(thisdir)
-
-# This will be used for batch submission
-def makeBatchScript(batchcommand,stringForNaming) :
-
-  # open modified batch script (fbatchout) for writing
-  batchtempname = '{0}/run_{1}.sh'.format(location_batchscripts,stringForNaming)
-  fbatchout = open(batchtempname, 'w')
-
-  with open(templatescript, 'r') as fin:
-    for line in fin :
-      if "ALRB_CONT_RUNPAYLOAD" in line :
-        line = 'export ALRB_CONT_RUNPAYLOAD="""{0}"""'.format(batchcommand)
-      if "TIMEVAL" in line :
-        line = line.replace("TIMEVAL","4:00:00")
-      fbatchout.write(line)
-
-  modcommand = 'chmod 744 {0}'.format(batchtempname)
-  subprocess.call(modcommand, shell=True)
-  fbatchout.close()
-
-  return batchtempname
 
 # Want to run a derivation job for each of the 
 # existing points, and give output TRUTH files meaningful names
@@ -61,15 +50,17 @@ for evnt_file in evnt_files :
   reco_command = "Reco_tf.py --inputEVNTFile {0} --outputDAODFile {1} --reductionConf TRUTH1".format(evnt_file,out_file)
   run_command = """echo 'starting job.';\ncd {0};\nasetup --restore;\ncd {1};\n{2}\n""".format(os.getcwd(),out_dir,reco_command)
 
-  # Make batch script
-  script = makeBatchScript(run_command,name_string)
+  if isTest :
+    print reco_command
+    continue
 
-  # Run derivations
-  submitcommand = "sbatch {0}".format(script)
-  print submitcommand
+  if useBatch :
 
-  if not isTest :
-    subprocess.call(submitcommand, shell=True) 
+    # Make and send
+    batchmanager.send_job(run_command,name_string)
+
+  else :
+    subprocess.call(reco_command, shell=True) 
 
   # Uncomment to do just one point
   #break 
