@@ -10,7 +10,7 @@ import glob
 # User settings
 # No point scanning items which I can't measure changing:
 # those are really just for Atsushi
-inputfile_form = "/home/kpachal/RHadronGeneration/EVNTtoTruth/EVNTtoTruth_*500_1ns*/DAOD_TRUTH1.*.root"
+inputfile_form = "/afs/cern.ch/work/k/kpachal/RHadronGeneration/EVNTtoTruth/EVNTtoTruth_*500_1ns*/DAOD_TRUTH1.*.root"
 
 verbose = False
 
@@ -124,6 +124,7 @@ def findGluinosAndRHads(truthparticles) :
   return gluinos,RHads    
 
 file_list = glob.glob(inputfile_form)
+print "Got file list",file_list
 for inputfile in file_list :
 
   t = readXAODFile(inputfile)
