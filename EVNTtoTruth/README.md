@@ -4,7 +4,3 @@ Details of TRUTH derivations and their creation here: https://twiki.cern.ch/twik
 
 Run:
 asetup 21.2.15.0,AthDerivation
-
-Example of a specific command would be:
-
-The script xxx

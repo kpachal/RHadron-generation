@@ -18,10 +18,9 @@ gentype   = str(infoStrings[2])
 decaytype = str(infoStrings[3])
 process   = '''
 generate g g > go go $ susysq susysq~ @1
+add process p p > go go j $ susysq susysq~ @2
+add process p p > go go j j $ susysq susysq~ @3
 '''
-# add process p p > go go j $ susysq susysq~ @2
-# add process p p > go go j j $ susysq susysq~ @3
-# '''
 njets = 2
 evt_multiplier = 6
 evgenLog.info('Registered generation of gluino grid '+str(runArgs.runNumber))
