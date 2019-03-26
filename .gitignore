@@ -1,3 +1,6 @@
+# Never
+*.pyc
+
 # Constantly regenerated outputs
 EVNTtoTruth/EVNTtoTruth_*
 Generate/Generate_*
