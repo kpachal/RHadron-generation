@@ -71,6 +71,7 @@ for file in files :
 
   # Draw this hist alone
   myPainter.draw2DHist(hist,"plots/test_"+spectrum_nominal,"R-Hadron ID [A.U.]",0,40,"R-Hadron mass [GeV]",1999,2010,"Events",luminosity=-1,CME=-1,doRectangular=False)
+  #myPainter.draw2DHist(hist,"plots/test_"+spectrum_nominal,"R-Hadron ID [A.U.]",0,80,"R-Hadron mass [GeV]",1999,2010,"Events",luminosity=-1,CME=-1,doRectangular=False)
 
 spectrum_list = sorted(validation_hists.keys())
 hist_list_nRHads = [validation_hists[i]["nRHads"] for i in spectrum_list]
