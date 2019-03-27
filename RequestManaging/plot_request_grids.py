@@ -10,8 +10,6 @@ request_DV = request_dict_DV.getDVGrid()
 request_dEdx = request_dict_dEdx.getdEdxGrid()
 request_stoppedparticle,request_stoppedparticle_variations = request_dict_stopped_particle.getStoppedParticleGrid()
 
-print request_dEdx["1ns"]
-
 # Initialize painter
 myPainter = Morisot()
 myPainter.setColourPalette("notSynthwave")
@@ -21,8 +19,6 @@ myPainter.setLabelType(4) # Sets label type i.e. Internal, Work in progress etc.
 requests = {"DV" : request_DV,
             "dEdx" : request_dEdx,
             "Stopped particle" : request_stoppedparticle}
-
-print request_stoppedparticle
 
 all_lifetimes = list(set(request_DV.keys() + request_dEdx.keys() + request_stoppedparticle.keys()))
 

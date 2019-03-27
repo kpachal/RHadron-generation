@@ -14,7 +14,8 @@ def getStoppedParticleGrid() :
     request_stoppedparticle[lifetime][mGluino] = {}
 
     request_stoppedparticle[lifetime][mGluino][mGluino-100] = nEvts
-    request_stoppedparticle[lifetime][mGluino][mGluino-500] = nEvts
+    if mGluino-500 > 100 :
+      request_stoppedparticle[lifetime][mGluino][mGluino-500] = nEvts
     request_stoppedparticle[lifetime][mGluino][100] = nEvts
 
   # Need to find a way to add variation samples
