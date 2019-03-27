@@ -10,6 +10,8 @@ request_DV = request_dict_DV.getDVGrid()
 request_dEdx = request_dict_dEdx.getdEdxGrid()
 request_stoppedparticle,request_stoppedparticle_variations = request_dict_stopped_particle.getStoppedParticleGrid()
 
+print request_dEdx["1ns"]
+
 # Initialize painter
 myPainter = Morisot()
 myPainter.setColourPalette("notSynthwave")
@@ -22,9 +24,11 @@ requests = {"DV" : request_DV,
 
 print request_stoppedparticle
 
-# Make a plot per lifetime.
 all_lifetimes = list(set(request_DV.keys() + request_dEdx.keys() + request_stoppedparticle.keys()))
 
+# Make a plot per lifetime.
+# Also, determine maximum number of events being requested at each point.
+# If max number comes from stopped particle, shout....
 for lifetime in all_lifetimes :
 
   print "Starting lifetime",lifetime
@@ -54,5 +58,9 @@ for lifetime in all_lifetimes :
     print "Adding graph for request",request
     graphs.append(thisgraph)
 
-  myPainter.drawSignalGrid(graphs,"plots/grid_{0}".format(lifetime),request_list,"m_{G} [GeV]","automatic","automatic","m_{#chi} [GeV]",0,"automatic")
+  if not "stable" in lifetime :
+    myPainter.drawSignalGrid(graphs,"plots/grid_{0}".format(lifetime),request_list,"m_{G} [GeV]","automatic","automatic","m_{#chi} [GeV]",0,"automatic")
+  else :
+    myPainter.drawSignalGrid(graphs,"plots/grid_{0}".format(lifetime),request_list,"m_{G} [GeV]","automatic","automatic","m_{#chi} [GeV]","automatic","automatic",addDiagonal=False)
+
 

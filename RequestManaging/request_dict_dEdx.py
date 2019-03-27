@@ -29,9 +29,10 @@ def getdEdxGrid() :
 
       # Only keep every 100 for compressed spectra
       # and for intermediate lifetimes
-      if mGluino % 50 == 0 : 
+      if mGluino % 50 == 0 and mGluino % 100 != 0 : 
 
         if not "3" in lifetime : 
+          print "Adding it!"
           request_dEdx[lifetime][mGluino][100] = nEvts
 
       # Else keep compressed spectra also
@@ -55,8 +56,9 @@ def getdEdxGrid() :
       if mGluino < highestMasses[lifetime] :
         request_dEdx[lifetime][mGluino][100] = nEvts
 
-        # ... unless compressed, which stops even sooner
-        if mGluino < 2401 :
+        # ... unless compressed, which stops even sooner.
+        # And again, don't need compressed for stable lifetimes.
+        if mGluino < 2401 and not "stable" in lifetime :
           request_dEdx[lifetime][mGluino][mGluino-30] = nEvts
 
       # If we didn't fill anything for this lifetime/mass, don't keep it
