@@ -109,11 +109,14 @@ def getDVGrid() :
             nEvts = numbermap_highsensitivity[separation]
 
         # Still compressed, ish
-        request_DV[lifetime][mGluino][mGluino - 100] = nEvts
+        # This one doesn't have to go as far
+        if mGluino < 2401 :
+          request_DV[lifetime][mGluino][mGluino - 100] = nEvts
 
         # Filling diagonals
         request_DV[lifetime][mGluino][mGluino - 200] = nEvts
         request_DV[lifetime][mGluino][mGluino - 500] = nEvts
+        request_DV[lifetime][mGluino][mGluino - 1000] = nEvts
 
         # And light neutralino
         request_DV[lifetime][mGluino][100] = nEvts
