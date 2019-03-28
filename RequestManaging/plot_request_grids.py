@@ -1,6 +1,9 @@
 import ROOT
 from art.morisot import Morisot
 
+# Turn off giant printouts
+verbose = False
+
 import request_dict_DV
 import request_dict_dEdx
 import request_dict_stopped_particle
@@ -71,26 +74,23 @@ for lifetime in all_lifetimes :
 
         # Want all of them for EVNT
         if not mNeutrino in n_EVNT[lifetime][mGluino].keys() :
-          n_EVNT[lifetime][mGluino] = {mNeutrino : mass_grid[mGluino][mNeutrino]}  
-        else :
-          if mass_grid[mGluino][mNeutrino] > n_EVNT[lifetime][mGluino][mNeutrino] :
-            n_EVNT[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+          n_EVNT[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+        elif mass_grid[mGluino][mNeutrino] > n_EVNT[lifetime][mGluino][mNeutrino] :
+          n_EVNT[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
 
         # Want non-stopped-particle for Fullsim
         if not "Stopped" in request :
           if not mNeutrino in n_FullSim[lifetime][mGluino].keys() :
-            n_FullSim[lifetime][mGluino] = {mNeutrino : mass_grid[mGluino][mNeutrino]}  
-          else :
-            if mass_grid[mGluino][mNeutrino] > n_FullSim[lifetime][mGluino][mNeutrino] :
-              n_FullSim[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+            n_FullSim[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+          elif mass_grid[mGluino][mNeutrino] > n_FullSim[lifetime][mGluino][mNeutrino] :
+            n_FullSim[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
 
         # Want stopped particle only for special reconstruction
         else :
           if not mNeutrino in n_specialSim[lifetime][mGluino].keys() :
-            n_specialSim[lifetime][mGluino] = {mNeutrino : mass_grid[mGluino][mNeutrino]}  
-          else :
-            if mass_grid[mGluino][mNeutrino] > n_specialSim[lifetime][mGluino][mNeutrino] :
-              n_specialSim[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+            n_specialSim[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+          elif mass_grid[mGluino][mNeutrino] > n_specialSim[lifetime][mGluino][mNeutrino] :
+            n_specialSim[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
 
     print "Adding graph for request",request
     graphs.append(thisgraph)
@@ -107,29 +107,30 @@ total_FullSim = 0
 total_SpecialReco = 0
 for lifetime in all_lifetimes :
 
-  print "For lifetime",lifetime
-  print "mGluino, mNeutralino, number of EVNT:"
+  if verbose :
+    print "For lifetime",lifetime
+    print "mGluino, mNeutrino, number of EVNT:"
 
   for mGluino in sorted(n_EVNT[lifetime].keys()) :
     for mNeutrino in sorted(n_EVNT[lifetime][mGluino].keys()) :
       thisEVNT = n_EVNT[lifetime][mGluino][mNeutrino]
-      print "\t",mGluino,"\t",mNeutrino,"\t",thisEVNT
+      if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",thisEVNT
       total_EVNT = total_EVNT+thisEVNT
 
-  print "number of FullSim:"
+  if verbose : print "number of FullSim:"
 
   for mGluino in sorted(n_FullSim[lifetime].keys()) :
     for mNeutrino in sorted(n_FullSim[lifetime][mGluino].keys()) :
       thisFS = n_FullSim[lifetime][mGluino][mNeutrino]
-      print "\t",mGluino,"\t",mNeutrino,"\t",thisFS
+      if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",thisFS
       total_FullSim = total_FullSim+thisFS
 
-  print "Number of special reco for Stopped Particle:"
+  if verbose : print "Number of special reco for Stopped Particle:"
 
   for mGluino in sorted(n_specialSim[lifetime].keys()) :
     for mNeutrino in sorted(n_specialSim[lifetime][mGluino].keys()) :
       this_special = n_specialSim[lifetime][mGluino][mNeutrino]
-      print "\t",mGluino,"\t",mNeutrino,"\t",this_special
+      if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",this_special
       total_SpecialReco = total_SpecialReco+this_special
 
 print "\nTotals:"

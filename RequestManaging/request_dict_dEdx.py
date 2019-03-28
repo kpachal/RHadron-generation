@@ -32,7 +32,6 @@ def getdEdxGrid() :
       if mGluino % 50 == 0 and mGluino % 100 != 0 : 
 
         if not "3" in lifetime : 
-          print "Adding it!"
           request_dEdx[lifetime][mGluino][100] = nEvts
 
       # Else keep compressed spectra also
