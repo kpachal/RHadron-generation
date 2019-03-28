@@ -30,8 +30,8 @@ def getDVGrid() :
       for mGluino in range(1000,2001,200) :
         
         # Number of events
-        nEvts = 0
-        for separation in sorted(numbermap_lowsensitivity.keys()) :
+        correctInterval = 1100
+        for separation in reversed(sorted(numbermap_lowsensitivity.keys())) :
           if mGluino < separation :
             nEvts = numbermap_lowsensitivity[separation]
 
@@ -46,7 +46,7 @@ def getDVGrid() :
 
         # Number of events
         nEvts = 0
-        for separation in sorted(numbermap_lowsensitivity.keys()) :
+        for separation in reversed(sorted(numbermap_lowsensitivity.keys())) :
           if mGluino < separation :
             nEvts = numbermap_lowsensitivity[separation]
 
@@ -60,7 +60,7 @@ def getDVGrid() :
 
         # Number of events
         nEvts = 0
-        for separation in sorted(numbermap_lowsensitivity.keys()) :
+        for separation in reversed(sorted(numbermap_lowsensitivity.keys())) :
           if mGluino < separation :
             nEvts = numbermap_lowsensitivity[separation]
 
@@ -75,7 +75,7 @@ def getDVGrid() :
 
         # Number of events
         nEvts = 0
-        for separation in sorted(numbermap_lowsensitivity.keys()) :
+        for separation in reversed(sorted(numbermap_lowsensitivity.keys())) :
           if mGluino < separation :
             nEvts = numbermap_lowsensitivity[separation]
 
@@ -89,7 +89,7 @@ def getDVGrid() :
 
         # Number of events
         nEvts = 0
-        for separation in sorted(numbermap_highsensitivity.keys()) :
+        for separation in reversed(sorted(numbermap_highsensitivity.keys())) :
           if mGluino < separation :
             nEvts = numbermap_highsensitivity[separation]
 
@@ -104,7 +104,7 @@ def getDVGrid() :
 
         # Number of events
         nEvts = 0
-        for separation in sorted(numbermap_highsensitivity.keys()) :
+        for separation in reversed(sorted(numbermap_highsensitivity.keys())) :
           if mGluino < separation :
             nEvts = numbermap_highsensitivity[separation]
 

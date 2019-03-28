@@ -2,7 +2,7 @@ import ROOT
 from art.morisot import Morisot
 
 # Turn off giant printouts
-verbose = False
+verbose = True
 
 import request_dict_DV
 import request_dict_dEdx
@@ -75,8 +75,9 @@ for lifetime in all_lifetimes :
         # Want all of them for EVNT
         if not mNeutrino in n_EVNT[lifetime][mGluino].keys() :
           n_EVNT[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
-        elif mass_grid[mGluino][mNeutrino] > n_EVNT[lifetime][mGluino][mNeutrino] :
-          n_EVNT[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
+        else :
+          if mass_grid[mGluino][mNeutrino] > n_EVNT[lifetime][mGluino][mNeutrino] :
+            n_EVNT[lifetime][mGluino][mNeutrino] = mass_grid[mGluino][mNeutrino]
 
         # Want non-stopped-particle for Fullsim
         if not "Stopped" in request :
