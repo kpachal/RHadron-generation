@@ -3,6 +3,10 @@ from art.morisot import Morisot
 
 # Turn off giant printouts
 verbose = True
+# 1 = Andrea's request
+# 2 = setting all points <=1 TeV, at 100 GeV spacing and lifetimes including 1, to 90k
+# 3 = setting all points <=1 TeV, at 100 GeV spacing and lifetimes including 1, to 160k
+ambitionLevel = 3
 
 import request_dict_DV
 import request_dict_dEdx
@@ -10,7 +14,7 @@ import request_dict_stopped_particle
 
 # Get requests
 request_DV = request_dict_DV.getDVGrid()
-request_dEdx = request_dict_dEdx.getdEdxGrid()
+request_dEdx = request_dict_dEdx.getdEdxGrid(ambitionLevel)
 request_stoppedparticle,request_stoppedparticle_variations = request_dict_stopped_particle.getStoppedParticleGrid()
 
 # Initialize painter
