@@ -4,7 +4,10 @@ infoStrings = runArgs.jobConfig[0].split("/")[-1].split(".")[2].split("_")
 
 masses['1000021'] = float(infoStrings[5])
 masses['1000022'] = float(infoStrings[6].split('.py')[0])
-lifetime = float(infoStrings[7].replace("ns","").split('.py')[0].replace('p','.') ) #in ns
+if "stab" in lifetime :
+  lifetime = -1
+else :
+  lifetime = float(infoStrings[7].replace("ns","").split('.py')[0].replace('p','.') ) #in ns
 spectrum = int(infoStrings[8].split('.py')[0].replace('sp',''))
 if '_gl' in runArgs.jobConfig[0]:
     gluinoballProb = float(infoStrings[-1].split('.')[0].replace("gl",""))*0.01

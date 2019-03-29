@@ -1,8 +1,9 @@
+import os
 import ROOT
 from art.morisot import Morisot
 
 # Turn off giant printouts
-verbose = True
+verbose = False
 # 1 = Andrea's request
 # 2 = setting all points <=1 TeV, at 100 GeV spacing and lifetimes including 1, to 90k
 # 3 = setting all points <=1 TeV, at 100 GeV spacing and lifetimes including 1, to 160k
@@ -106,10 +107,13 @@ for lifetime in all_lifetimes :
     myPainter.drawSignalGrid(graphs,"plots/grid_{0}".format(lifetime),request_list,"m_{G} [GeV]","automatic","automatic","m_{#chi} [GeV]","automatic","automatic",addDiagonal=False)
 
 # Now summarise number of events at each lifetime. 
-# Print things to check them by eye.
+# Print things to check them by eye, if desired.
+# Also use this step to create job options for the full request.
 total_EVNT = 0
 total_FullSim = 0
 total_SpecialReco = 0
+jo_dir = os.getcwd()+"/JOs"
+jo_format = "MC15.{0}.MGPy8EG_A14NNPDF23LO_GG_direct_RH_{1}_{2}_{3}_{4}_{5}.py"
 for lifetime in all_lifetimes :
 
   if verbose :
@@ -121,6 +125,20 @@ for lifetime in all_lifetimes :
       thisEVNT = n_EVNT[lifetime][mGluino][mNeutrino]
       if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",thisEVNT
       total_EVNT = total_EVNT+thisEVNT
+
+      # Generate JO
+      convert_lifetime_ns = lifetime
+      if "ps" in lifetime :
+        lifetime_ps = eval(lifetime.replace("ps",""))
+        lifetime_ns = round(lifetime_ps/1000.0,2)
+        convert_lifetime_ns = "{0}ns".format(lifetime_ns)
+        convert_lifetime_ns = convert_lifetime_ns.replace(".","p")
+      if "stable" in lifetime :
+        convert_lifetime_ns = "stab"
+      jo_name = jo_format.format("000001",mGluino,mNeutrino,convert_lifetime_ns,"sp5","gl10")
+      jo_total = jo_dir+"/"+jo_name
+      with open(jo_total, 'w') as outfile :
+        outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
 
   if verbose : print "number of FullSim:"
 
@@ -138,6 +156,20 @@ for lifetime in all_lifetimes :
       if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",this_special
       total_SpecialReco = total_SpecialReco+this_special
 
+# Generate special JOs for our one point with variations
+for spectrum in range(1,9) :
+  if spectrum == 5 : continue
+  jo_name = jo_format.format("000001",1000,100,"stab","sp{0}".format(spectrum),"gl10")
+  jo_total = jo_dir+"/"+jo_name
+  with open(jo_total, 'w') as outfile :
+    outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
+for gluinoballFrac in ["gl5","gl20"] :
+  jo_name = jo_format.format("000001",1000,100,"stab","sp5",gluinoballFrac)
+  jo_total = jo_dir+"/"+jo_name
+  with open(jo_total, 'w') as outfile :
+    outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
+
+# Summarise numbers of events
 print "\nTotals:"
 print "\tEVNT:",total_EVNT,"=",round(float(total_EVNT)/1000000.0,2),"million"
 print "\tFullSim:",total_FullSim,"=",round(float(total_FullSim)/1000000.0,2),"million"
