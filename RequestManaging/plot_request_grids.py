@@ -14,6 +14,8 @@ import request_dict_DV
 import request_dict_dEdx
 import request_dict_stopped_particle
 
+import cross_section_dict
+
 # Get requests
 request_DV = request_dict_DV.getDVGrid()
 request_dEdx = request_dict_dEdx.getdEdxGrid(ambitionLevel)
