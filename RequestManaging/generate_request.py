@@ -10,6 +10,12 @@ verbose = False
 # 3 = setting all points <=1 TeV, at 100 GeV spacing and lifetimes including 1, to 160k
 ambitionLevel = 3
 
+# Request priority
+priority = 2
+
+# Release used for generation
+release = "TBD"
+
 import request_dict_DV
 import request_dict_dEdx
 import request_dict_stopped_particle
@@ -115,15 +121,19 @@ for lifetime in all_lifetimes :
 total_EVNT = 0
 total_FullSim = 0
 total_SpecialReco = 0
+jo_dict = {}
 jo_dir = os.getcwd()+"/JOs"
 jo_format = "MC15.{0}.MGPy8EG_A14NNPDF23LO_GG_direct_RH_{1}_{2}_{3}_{4}_{5}.py"
 for lifetime in all_lifetimes :
+
+  jo_dict[lifetime] = {}
 
   if verbose :
     print "For lifetime",lifetime
     print "mGluino, mNeutrino, number of EVNT:"
 
   for mGluino in sorted(n_EVNT[lifetime].keys()) :
+    jo_dict[lifetime][mGluino] = {}
     for mNeutrino in sorted(n_EVNT[lifetime][mGluino].keys()) :
       thisEVNT = n_EVNT[lifetime][mGluino][mNeutrino]
       if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",thisEVNT
@@ -142,6 +152,8 @@ for lifetime in all_lifetimes :
       jo_total = jo_dir+"/"+jo_name
       with open(jo_total, 'w') as outfile :
         outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
+
+      jo_dict[lifetime][mGluino][mNeutrino] = jo_name
 
   if verbose : print "number of FullSim:"
 
@@ -172,8 +184,104 @@ for gluinoballFrac in ["gl5","gl20"] :
   with open(jo_total, 'w') as outfile :
     outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
 
+# Generate a spreadsheet
+# Requirements are here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MC16SpreadSheet
+description = "Long-lived gluino pair production, m_gl={0}, m_LSP={1}, lifetime={2}"
+lines_FS = []
+lines_EVGNOnly = []
+for lifetime in all_lifetimes :
+  for mGluino in jo_dict[lifetime].keys() :
+    for mNeutrino in jo_dict[lifetime][mGluino].keys() :
+
+      # Using this for list sorting as well as for naming
+      useGLMass = "{0}".format(mGluino)
+      if mGluino < 1000 : useGLMass = "0"+useGLMass
+      useNeutMass = "{0}".format(mNeutrino)
+      if mNeutrino < 1000 : useNeutMass = "0"+useNeutMass
+      this_description = description.format(useGLMass,useNeutMass,lifetime)
+
+      # Do 2 versions depending on whether this is FS or EVGN
+      for sim in ["FS","EVNT"] :
+
+        line = this_description + "\t"
+
+        # JobOptions
+        line = line + jo_dict[lifetime][mGluino][mNeutrino]+"\t"
+
+        # CME
+        line = line + "13000\t"
+
+        # nEvents
+        # TODO: Split into mc16a/mc16d/mc16e
+        try : nEVNT = n_EVNT[lifetime][mGluino][mNeutrino]
+        except : continue
+        try : nFS = n_FullSim[lifetime][mGluino][mNeutrino]
+        except : continue
+
+        # Events, EVGEN-only
+        # This is where we continue if we don't need any EVGN only events
+        nEvts = 0
+        if "EVNT" in sim :
+
+          # Don't need a line if numbers are equal
+          if not nEVNT > nFS :
+            continue
+
+          nEvts = nEVNT - nFS
+          line = line + "{0}\t\t\t".format(nEvts)
+
+        # Events straight to full simulation
+        else :
+
+          # A few of these points are stopped-particle only.
+          if nFS==0 :
+            continue
+
+          line = line + "\t{0}\t\t".format(nFS)
+          nEvts = nFS
+
+        # Priority, then skip "Output formats"
+        line = line + "{0}\t\t".format(priority)
+
+        # Cross section (pb)
+        xsec = cross_section_dict.xs[mGluino][0]
+        line = line + "{0}\t".format(xsec)
+
+        # Effective luminosity (1/fb)
+        # Ignoring our filter eff of 1 and converting from pb to fb
+        eff_lumi = (float(nEvts)/xsec)/1000.0
+        line = line + "{0}\t".format(eff_lumi)
+
+        # Filter efficiency (1 for us, then skip CPU time and input files)
+        line = line + "1\t\t\t"
+
+        # MC-tag: ????
+        # TODO FIXME
+        line = line + "\t"
+
+        # Release
+        line = line + release+"\n"
+
+        if "FS" in sim :
+          lines_FS.append(line)
+        else :
+          lines_EVGNOnly.append(line)
+
+# Add special JOs to FS
+# TODO
+
+  
+# Print the text file to turn into spreadsheet
+with open("spreadsheets/spreadsheet.txt","w") as outfile :
+  for line in sorted(lines_FS) :
+    outfile.write(line)
+  for line in sorted(lines_EVGNOnly) :
+    outfile.write(line)
+
 # Summarise numbers of events
 print "\nTotals:"
 print "\tEVNT:",total_EVNT,"=",round(float(total_EVNT)/1000000.0,2),"million"
 print "\tFullSim:",total_FullSim,"=",round(float(total_FullSim)/1000000.0,2),"million"
 print "\tSpecial for Stopped Particle:",total_SpecialReco,"=",round(float(total_SpecialReco)/1000000.0,2),"million"
+
+
