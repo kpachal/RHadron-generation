@@ -4,7 +4,7 @@ infoStrings = runArgs.jobConfig[0].split("/")[-1].split(".")[2].split("_")
 
 masses['1000021'] = float(infoStrings[5])
 masses['1000022'] = float(infoStrings[6].split('.py')[0])
-if "stab" in lifetime :
+if "stab" in infoStrings[7] :
   lifetime = -1
 else :
   lifetime = float(infoStrings[7].replace("ns","").split('.py')[0].replace('p','.') ) #in ns
