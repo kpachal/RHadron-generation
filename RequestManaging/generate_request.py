@@ -210,8 +210,34 @@ for gluinoballFrac in ["gl5","gl20"] :
   total_FullSim = total_FullSim+30000
   special_JOs.append(jo_name)
 
-#def formulate_line(description, jo_name, nEvts_EVNT, nEvts_FS, xsec, f_lumi, release) :
+def formulate_line(description, jo_name, nEvts_EVNT, nEvts_FS, xsec, efff_lumi, release) :
 
+  #  First column: description
+  line = description + "\t"
+
+  # Job options and CME
+  line = line + jo_name +"\t13000\t"
+
+  # nEvts, fullsim and EVNT only
+  first = ""
+  if nEvts_EVNT > 0 :
+    first = nEvts_EVNT
+  second = ""
+  if nEvts_FS > 0 :
+    second = nEvts_FS
+  line = line + "{0}\t{1}\t\t".format(first,second)
+
+  # Priority, then skip "Output formats"
+  line = line + "{0}\t\t".format(priority)
+
+  # Cross section (pb), luminosity, filter efficiency
+  line = line + "{0}\t{1}\t{2}\t".format(xsec,eff_lumi,1)
+
+  # Three blank spaces, assuming MC tag will be added by 
+  # production team. Then the release
+  line = line + "\t\t\t" + release + "\n"
+
+  return line
 
 # Generate one spreadsheet per campaign.
 # Requirements are here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MC16SpreadSheet
@@ -232,13 +258,8 @@ for lifetime in all_lifetimes :
       # Do 2 versions depending on whether this is FS or EVGN
       for sim in ["FS","EVNT"] :
 
-        line = this_description + "\t"
-
         # JobOptions
-        line = line + jo_dict[lifetime][mGluino][mNeutrino]+"\t"
-
-        # CME
-        line = line + "13000\t"
+        jo_name = jo_dict[lifetime][mGluino][mNeutrino]
 
         # nEvents
         try : nEVNT = n_EVNT[lifetime][mGluino][mNeutrino]
@@ -258,9 +279,7 @@ for lifetime in all_lifetimes :
           # Don't need a line if numbers are equal
           if not nEVNT > nFS :
             continue
-
           nEvts = nEVNT - nFS
-          line = line + "{0}\t\t\t".format(nEvts)
 
         # Events straight to full simulation
         else :
@@ -268,30 +287,19 @@ for lifetime in all_lifetimes :
           # A few of these points are stopped-particle only.
           if nFS==0 :
             continue
-
-          line = line + "\t{0}\t\t".format(nFS)
           nEvts = nFS
-
-        # Priority, then skip "Output formats"
-        line = line + "{0}\t\t".format(priority)
 
         # Cross section (pb)
         xsec = cross_section_dict.xs[mGluino][0]
-        line = line + "{0}\t".format(xsec)
 
         # Effective luminosity (1/fb)
         # Ignoring our filter eff of 1 and converting from pb to fb
         eff_lumi = (float(nEvts)/xsec)/1000.0
-        line = line + "{0}\t".format(eff_lumi)
 
-        # Filter efficiency (1 for us, then skip CPU time and input files)
-        line = line + "1\t\t\t"
-
-        # MC-tag: to be added by production team
-        line = line + "\t"
-
-        # Release
-        line = line + release+"\n"
+        line = formulate_line(this_description, jo_name, 
+          nEvts if "EVNT" in sim else -1, 
+          nEvts if "FS" in sim else -1,
+          xsec, eff_lumi, release)
 
         if "FS" in sim :
  
@@ -306,6 +314,18 @@ for lifetime in all_lifetimes :
           # Campaigns don't affect evgen - put these
           # all in one list.
           lines_EVGNOnly.append(line)
+
+# Add special JOs to FS
+# TODO: If we want these in separate campaigns, change here.
+for jo in special_JOs :
+  this_description = "Long-lived gluino pair production, variation sample testing mass spectrum and gluinoball fraction variation."
+  nEvts_FS = 30000
+  nEvts_EVNT = -1
+  xsec = cross_section_dict.xs[1000][0]
+  eff_lumi = (float(nEvts_FS)/xsec)/1000.0
+  line = formulate_line(this_description, jo, 
+          nEvts_EVNT, nEvts_FS, xsec, eff_lumi, release)
+  lines_FS["mc16a"].append(line)
 
 # Print the text file to turn into spreadsheet
 for campaign in ["mc16a","mc16d","mc16e"] :
