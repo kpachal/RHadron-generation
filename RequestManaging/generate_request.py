@@ -14,7 +14,7 @@ ambitionLevel = 3
 priority = 2
 
 # Release used for generation
-release = "TBD"
+release = ""
 
 import request_dict_DV
 import request_dict_dEdx
@@ -38,6 +38,25 @@ requests = {"DV" : request_DV,
             "Stopped particle" : request_stoppedparticle}
 
 all_lifetimes = list(set(request_DV.keys() + request_dEdx.keys() + request_stoppedparticle.keys()))
+
+# This is for splitting number of events into campaigns
+campaign_nevt_dict = {
+30000 : {"mc16a" : 10000,
+         "mc16d" : 10000,
+         "mc16e" : 10000},
+50000 : {"mc16a" : 10000,
+         "mc16d" : 20000,
+         "mc16e" : 20000},
+100000 : {"mc16a" : 20000,
+         "mc16d" : 40000,
+         "mc16e" : 60000},
+160000 : {"mc16a" : 30000,
+         "mc16d" : 60000,
+         "mc16e" : 70000},
+300000 : {"mc16a" : 60000,
+         "mc16d" : 120000,
+         "mc16e" : 150000}
+}
 
 # Make a plot per lifetime.
 # Also, determine maximum number of events being requested at each point.
@@ -172,22 +191,32 @@ for lifetime in all_lifetimes :
       total_SpecialReco = total_SpecialReco+this_special
 
 # Generate special JOs for our one point with variations
+special_JOs = []
 for spectrum in range(1,9) :
   if spectrum == 5 : continue
   jo_name = jo_format.format("000001",1000,100,"stab","sp{0}".format(spectrum),"gl10")
   jo_total = jo_dir+"/"+jo_name
   with open(jo_total, 'w') as outfile :
     outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
+  total_EVNT = total_EVNT+30000
+  total_FullSim = total_FullSim+30000
+  special_JOs.append(jo_name)
 for gluinoballFrac in ["gl5","gl20"] :
   jo_name = jo_format.format("000001",1000,100,"stab","sp5",gluinoballFrac)
   jo_total = jo_dir+"/"+jo_name
   with open(jo_total, 'w') as outfile :
     outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
+  total_EVNT = total_EVNT+30000
+  total_FullSim = total_FullSim+30000
+  special_JOs.append(jo_name)
 
-# Generate a spreadsheet
+#def formulate_line(description, jo_name, nEvts_EVNT, nEvts_FS, xsec, f_lumi, release) :
+
+
+# Generate one spreadsheet per campaign.
 # Requirements are here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MC16SpreadSheet
 description = "Long-lived gluino pair production, m_gl={0}, m_LSP={1}, lifetime={2}"
-lines_FS = []
+lines_FS = {"mc16a":[],"mc16d" : [], "mc16e" : []}
 lines_EVGNOnly = []
 for lifetime in all_lifetimes :
   for mGluino in jo_dict[lifetime].keys() :
@@ -212,15 +241,18 @@ for lifetime in all_lifetimes :
         line = line + "13000\t"
 
         # nEvents
-        # TODO: Split into mc16a/mc16d/mc16e
         try : nEVNT = n_EVNT[lifetime][mGluino][mNeutrino]
-        except : continue
+        except : 
+          nEVNT = 0
         try : nFS = n_FullSim[lifetime][mGluino][mNeutrino]
-        except : continue
+        except : 
+          nFS = 0
+        try : nSpecial = n_specialSim[lifetime][mGluino][mNeutrino]
+        except :
+          nSpecial = 0
 
         # Events, EVGEN-only
-        # This is where we continue if we don't need any EVGN only events
-        nEvts = 0
+        # This is where we continue if we don't need any EVGEN only events
         if "EVNT" in sim :
 
           # Don't need a line if numbers are equal
@@ -255,28 +287,34 @@ for lifetime in all_lifetimes :
         # Filter efficiency (1 for us, then skip CPU time and input files)
         line = line + "1\t\t\t"
 
-        # MC-tag: ????
-        # TODO FIXME
+        # MC-tag: to be added by production team
         line = line + "\t"
 
         # Release
         line = line + release+"\n"
 
         if "FS" in sim :
-          lines_FS.append(line)
+ 
+          # Need a separate line per campaign.
+          for campaign in ["mc16a","mc16d","mc16e"] :
+            nEvts_campaign = campaign_nevt_dict[nEvts][campaign]
+            thisline = line.replace("{0}".format(nEvts),"{0}".format(nEvts_campaign))
+            lines_FS[campaign].append(thisline)
+
         else :
+
+          # Campaigns don't affect evgen - put these
+          # all in one list.
           lines_EVGNOnly.append(line)
 
-# Add special JOs to FS
-# TODO
-
-  
 # Print the text file to turn into spreadsheet
-with open("spreadsheets/spreadsheet.txt","w") as outfile :
-  for line in sorted(lines_FS) :
-    outfile.write(line)
-  for line in sorted(lines_EVGNOnly) :
-    outfile.write(line)
+for campaign in ["mc16a","mc16d","mc16e"] :
+  with open("spreadsheets/spreadsheet_{0}.txt".format(campaign),"w") as outfile :
+    for line in sorted(lines_FS[campaign]) :
+      outfile.write(line)
+    if "mc16a" in campaign :
+      for line in sorted(lines_EVGNOnly) :
+        outfile.write(line)
 
 # Summarise numbers of events
 print "\nTotals:"
