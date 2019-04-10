@@ -325,7 +325,7 @@ for jo in special_JOs :
   eff_lumi = (float(nEvts_FS)/xsec)/1000.0
   line = formulate_line(this_description, jo, 
           nEvts_EVNT, nEvts_FS, xsec, eff_lumi, release)
-  lines_FS["mc16a"].append(line)
+  lines_FS["mc16d"].append(line)
 
 # Print the text file to turn into spreadsheet
 for campaign in ["mc16a","mc16d","mc16e"] :
