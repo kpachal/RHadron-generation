@@ -20,7 +20,7 @@ if masses['1000022']<0.5: masses['1000022']=0.5
 gentype   = str(infoStrings[2])
 decaytype = str(infoStrings[3])
 process   = '''
-generate g g > go go $ susysq susysq~ @1
+generate p p > go go $ susysq susysq~ @1
 add process p p > go go j $ susysq susysq~ @2
 add process p p > go go j j $ susysq susysq~ @3
 '''
