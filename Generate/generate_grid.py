@@ -17,10 +17,15 @@ batch_type = "condor"
 # Take central value as "crossing point" and scan the other axis.
 grid = {
   "mass_gluino" : [1000,1500,2000,2500,3000],
+#  "mass_gluino" : [2000],
   "mass_neutralino" : [100,300,500,700,900],
+#  "mass_neutralino" : [500],
   "mass_spectrum" : ["sp0","sp3","sp5","sp8"],
-  "lifetime" : ["0p1ns","0p5ns","1ns","10ns"],
+#  "mass_spectrum" : ["sp5"],
+  "lifetime" : ["0p1ns","0p5ns","1ns","10ns","stab"],
+#  "lifetime" : ["stab"],
   "gluinoball_frac" : [5,10,20],
+#  "gluinoball_frac" : [10],
 }
 
 # Create batch handler
@@ -60,12 +65,15 @@ for scan_axis in ordered_axes :
 
 # Remove duplicates from points
 used_combos = []
+clean_points = []
 for point in points :
   name_string = "{0}_{1}_{2}_{3}_gl{4}".format(point["mass_gluino"],point["mass_neutralino"],point["lifetime"],point["mass_spectrum"],point["gluinoball_frac"])
   if name_string in used_combos :
-    del points[points.index(point)]
+    continue
   else :
     used_combos.append(name_string)
+    clean_points.append(point)
+points = clean_points
 
 # Loop over each point to make JOs and launch job
 for point in points :
