@@ -11,10 +11,13 @@ verbose = False
 ambitionLevel = 3
 
 # Request priority
-priority = 2
+priority = 1
 
 # Release used for generation
 release = ""
+
+# DSID. Will be incremented as we go.
+DSID = 449281
 
 import request_dict_DV
 import request_dict_dEdx
@@ -49,13 +52,13 @@ campaign_nevt_dict = {
          "mc16e" : 20000},
 100000 : {"mc16a" : 20000,
          "mc16d" : 40000,
-         "mc16e" : 60000},
+         "mc16e" : 40000},
 160000 : {"mc16a" : 30000,
          "mc16d" : 60000,
          "mc16e" : 70000},
 300000 : {"mc16a" : 60000,
-         "mc16d" : 120000,
-         "mc16e" : 150000}
+         "mc16d" : 100000,
+         "mc16e" : 140000}
 }
 
 # Make a plot per lifetime.
@@ -140,6 +143,7 @@ for lifetime in all_lifetimes :
 total_EVNT = 0
 total_FullSim = 0
 total_SpecialReco = 0
+count_lines_FullSim = 0
 jo_dict = {}
 jo_dir = os.getcwd()+"/JOs"
 jo_format = "MC15.{0}.MGPy8EG_A14NNPDF23LO_GG_direct_RH_{1}_{2}_{3}_{4}_{5}.py"
@@ -148,7 +152,7 @@ for lifetime in all_lifetimes :
   jo_dict[lifetime] = {}
 
   if verbose :
-    print "For lifetime",lifetime
+    print "\nFor lifetime",lifetime
     print "mGluino, mNeutrino, number of EVNT:"
 
   for mGluino in sorted(n_EVNT[lifetime].keys()) :
@@ -167,7 +171,8 @@ for lifetime in all_lifetimes :
         convert_lifetime_ns = convert_lifetime_ns.replace(".","p")
       if "stable" in lifetime :
         convert_lifetime_ns = "stab"
-      jo_name = jo_format.format("000001",mGluino,mNeutrino,convert_lifetime_ns,"sp5","gl10")
+      jo_name = jo_format.format(DSID,mGluino,mNeutrino,convert_lifetime_ns,"sp5","gl10")
+      DSID=DSID+1
       jo_total = jo_dir+"/"+jo_name
       with open(jo_total, 'w') as outfile :
         outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
@@ -181,6 +186,7 @@ for lifetime in all_lifetimes :
       thisFS = n_FullSim[lifetime][mGluino][mNeutrino]
       if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",thisFS
       total_FullSim = total_FullSim+thisFS
+      count_lines_FullSim = count_lines_FullSim+1
 
   if verbose : print "Number of special reco for Stopped Particle:"
 
@@ -190,25 +196,35 @@ for lifetime in all_lifetimes :
       if verbose : print "\t",mGluino,"\t",mNeutrino,"\t",this_special
       total_SpecialReco = total_SpecialReco+this_special
 
+if verbose :
+  print "Number of FullSim JOs per spreadsheet (without systematic variations):",count_lines_FullSim
+
 # Generate special JOs for our one point with variations
 special_JOs = []
 for spectrum in range(1,9) :
   if spectrum == 5 : continue
-  jo_name = jo_format.format("000001",1000,100,"stab","sp{0}".format(spectrum),"gl10")
+  jo_name = jo_format.format(DSID,1000,100,"stab","sp{0}".format(spectrum),"gl10")
+  DSID = DSID+1
   jo_total = jo_dir+"/"+jo_name
   with open(jo_total, 'w') as outfile :
     outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
   total_EVNT = total_EVNT+30000
   total_FullSim = total_FullSim+30000
+  count_lines_FullSim = count_lines_FullSim+1
   special_JOs.append(jo_name)
 for gluinoballFrac in ["gl5","gl20"] :
-  jo_name = jo_format.format("000001",1000,100,"stab","sp5",gluinoballFrac)
+  jo_name = jo_format.format(DSID,1000,100,"stab","sp5",gluinoballFrac)
+  DSID = DSID+1
   jo_total = jo_dir+"/"+jo_name
   with open(jo_total, 'w') as outfile :
     outfile.write("include ( 'MC15JobOptions/MadGraphControl_SimplifiedModel_GG_direct_LongLived_RHadron.py' )\n")
   total_EVNT = total_EVNT+30000
   total_FullSim = total_FullSim+30000
+  count_lines_FullSim = count_lines_FullSim+1  
   special_JOs.append(jo_name)
+
+if verbose :
+  print "When including systematic variations, number of FullSim JOs will be:",count_lines_FullSim
 
 def formulate_line(description, jo_name, nEvts_EVNT, nEvts_FS, xsec, efff_lumi, release) :
 
@@ -327,11 +343,24 @@ for jo in special_JOs :
           nEvts_EVNT, nEvts_FS, xsec, eff_lumi, release)
   lines_FS["mc16d"].append(line)
 
-# Print the text file to turn into spreadsheet
+# Print the text file to turn into spreadsheet. Tally numbers of events.
+total_FullSim_mc16a = 0
+total_FullSim_mc16d = 0
+total_FullSim_mc16e = 0
 for campaign in ["mc16a","mc16d","mc16e"] :
   with open("spreadsheets/spreadsheet_{0}.txt".format(campaign),"w") as outfile :
     for line in sorted(lines_FS[campaign]) :
       outfile.write(line)
+      
+      # Counting
+      nEvts = eval(line.split()[-5])
+      if "mc16a" in campaign :
+        total_FullSim_mc16a = total_FullSim_mc16a+nEvts
+      elif "mc16d" in campaign :
+        total_FullSim_mc16d = total_FullSim_mc16d+nEvts 
+      elif "mc16e" in campaign :
+        total_FullSim_mc16e = total_FullSim_mc16e+nEvts      
+    
     if "mc16a" in campaign :
       for line in sorted(lines_EVGNOnly) :
         outfile.write(line)
@@ -340,6 +369,13 @@ for campaign in ["mc16a","mc16d","mc16e"] :
 print "\nTotals:"
 print "\tEVNT:",total_EVNT,"=",round(float(total_EVNT)/1000000.0,2),"million"
 print "\tFullSim:",total_FullSim,"=",round(float(total_FullSim)/1000000.0,2),"million"
+print "\tEVGEN only:",total_EVNT - total_FullSim,"=",round(float(total_EVNT - total_FullSim)/1000000.0,2),"million"
 print "\tSpecial for Stopped Particle:",total_SpecialReco,"=",round(float(total_SpecialReco)/1000000.0,2),"million"
+
+print "\n\tCalculated total FullSim by campaign:"
+print "\t\tmc16a:\t",total_FullSim_mc16a
+print "\t\tmc16d:\t",total_FullSim_mc16d
+print "\t\tmc16e:\t",total_FullSim_mc16e
+print "\tFor a total of",total_FullSim_mc16a+total_FullSim_mc16d+total_FullSim_mc16e
 
 
